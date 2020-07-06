@@ -104,6 +104,7 @@ public abstract class AbstractBeanFactoryTests {
 
 	@Test
 	public void getInstanceByMatchingClass() {
+		// TODO 进行调试
 		Object o = getBeanFactory().getBean("rod", TestBean.class);
 		assertTrue("Rod bean is a TestBean", o instanceof TestBean);
 	}
@@ -138,6 +139,7 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void getSharedInstanceByNonmatchingClass() {
 		try {
+			// TODO debug调试一下
 			getBeanFactory().getBean("rod", BeanFactory.class);
 			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
 		}

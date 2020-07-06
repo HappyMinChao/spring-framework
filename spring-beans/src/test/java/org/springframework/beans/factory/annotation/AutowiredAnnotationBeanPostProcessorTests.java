@@ -1648,6 +1648,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void testGenericsBasedFactoryBeanInjectionWithBeanDefinition() {
+		// TODO 调试
 		RootBeanDefinition bd = new RootBeanDefinition(RepositoryFactoryBeanInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);

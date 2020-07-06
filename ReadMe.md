@@ -47,3 +47,5 @@ BeanDefinitionParserDelegate： 具体的有bean标签解析成BeanDefinition对
 ## BeanFactory和FactoryBean的区别
     BeanFactory是一个工厂
     FactoryBean是一个对象， 该对象有生成另一个对象的能力
+    
+## InstantiationAwareBeanPostProcessor 后置处理器
