@@ -119,12 +119,17 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * @see #getResourcePatternResolver
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+		// 获取资源的定位， 这里的getConfigResources是一个空实现， 真正实现是调用自雷的获取资源定位的方法
+		// 比如： ClassPathXmlApplicationContext中进行了实现， 而FileSystemXmlApplicationContext没用使用该方法
 		Resource[] configResources = getConfigResources();
 		if (configResources != null) {
+			// XML Bean 读取器， 调用其父类AbstractBeanDefinitionReader读取定位的资源
 			reader.loadBeanDefinitions(configResources);
 		}
+		// 如果自雷中获取的资源定位为空， 则获取FileSystemXmlApplicationContext构造方法中setConfigLocations方法设置的资源
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
+			// XML Bean读取器调用其父类AbstractBeanDefinitionsReader读取定位的资源
 			reader.loadBeanDefinitions(configLocations);
 		}
 	}

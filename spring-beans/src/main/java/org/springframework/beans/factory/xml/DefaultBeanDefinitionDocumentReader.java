@@ -85,6 +85,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 
 	/**
+	 * 解析BeanDefinition并注册到容器中
 	 * This implementation parses bean definitions according to the "spring-beans" XSD
 	 * (or DTD, historically).
 	 * <p>Opens a DOM Document; then initializes the default settings
@@ -94,7 +95,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
 		logger.debug("Loading bean definitions");
+		// 获取Docment的根元素<beans>标签
 		Element root = doc.getDocumentElement();
+		// 真正实现BeanDefinition解析和注册工作
 		doRegisterBeanDefinitions(root);
 	}
 
@@ -148,7 +151,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		// 模板方法模式
 		// 解析前处理，留给子类实现
 		preProcessXml(root);
-		// 解析xml核心方法
+		// 从本标签开始解析BeanDefinition信息， 解析xml核心方法
 		parseBeanDefinitions(root, this.delegate);
 		// 解析后处理，留给子类实现
 		postProcessXml(root);
@@ -170,12 +173,15 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * @param root the DOM root element of the document
 	 */
 	protected void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate) {
+		// 判断是否默认命名空间
 		if (delegate.isDefaultNamespace(root)) {
+			// 获取Document对象根元素的所有子节点(bean标签、 import标签、 alias标签和自定义标签content
 			NodeList nl = root.getChildNodes();
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
 				if (node instanceof Element) {
 					Element ele = (Element) node;
+					// bean标签、 import标签 、 alias标签， 则使用默认解析规则
 					if (delegate.isDefaultNamespace(ele)) {
 						// 默认使用spring-bean规范的xml
 						// <bean name="test" class="com.zhysunny.spring.beans.TestBean" />
@@ -184,26 +190,37 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 					else {
 						// 这里涉及到自定义标签，需要些dtd或者xsd规范
 						// <tx:annotation />
+						// 像content标签、 aop标签、 tx标签， 则使用用户自定义的解析规则解析元素节点
 						delegate.parseCustomElement(ele);
 					}
 				}
 			}
 		}
 		else {
+			// 如果不是默认命名空间， 则使用用户自定义的解析规则解析元素节点
 			delegate.parseCustomElement(root);
 		}
 	}
 
+	/**
+	 * 解析bean标签等默认子标签
+	 * @param ele
+	 * @param delegate
+	 */
 	private void parseDefaultElement(Element ele, BeanDefinitionParserDelegate delegate) {
+		// import 标签
 		if (delegate.nodeNameEquals(ele, IMPORT_ELEMENT)) {
 			importBeanDefinitionResource(ele);
 		}
+		// alias 标签
 		else if (delegate.nodeNameEquals(ele, ALIAS_ELEMENT)) {
 			processAliasRegistration(ele);
 		}
+		// bean 标签
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
 			processBeanDefinition(ele, delegate);
 		}
+		// beans 标签
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
 			// recurse
 			doRegisterBeanDefinitions(ele);
@@ -311,11 +328,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	}
 
 	/**
+	 * 解析bean标签，创建BeanDefinition对象
 	 * Process the given bean element, parsing the bean definition
 	 * and registering it with the registry.
 	 */
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
-		// 解析bean标签
+		// 委托给该类， 进行BeanDefinition的具体解析
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
 			// 通过名称空间处理程序修饰给定的bean定义(如果适用的话)。

@@ -178,7 +178,12 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		return this.beanNameGenerator;
 	}
 
-
+	/**
+	 * 通过resource定位xml资源， 进行加载并读取BeanDefinition, 几个重构的方法最终都会调用改方法
+	 * @param resources the resource descriptors
+	 * @return
+	 * @throws BeanDefinitionStoreException
+	 */
 	@Override
 	public int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {
 		Assert.notNull(resources, "Resource array must not be null");

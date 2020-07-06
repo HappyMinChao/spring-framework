@@ -80,6 +80,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	 * from the given XML file and automatically refreshing the context.
 	 * @param configLocation resource location
 	 * @throws BeansException if context creation failed
+	 * 根据给定的xml创建xml文件， 默认是刷新容器
 	 */
 	public ClassPathXmlApplicationContext(String configLocation) throws BeansException {
 		this(new String[] {configLocation}, true, null);
