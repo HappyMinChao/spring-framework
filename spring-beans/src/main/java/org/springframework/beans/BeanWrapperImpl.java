@@ -309,8 +309,10 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 			}
 		}
 
+		// 如果是POJO的话
 		@Override
 		public void setValue(final @Nullable Object value) throws Exception {
+			// 使用JDK内省技术， 获取对指定属性的setter方法的获取(writeMethod)
 			final Method writeMethod = (this.pd instanceof GenericTypeAwarePropertyDescriptor ?
 					((GenericTypeAwarePropertyDescriptor) this.pd).getWriteMethodForActualAccess() :
 					this.pd.getWriteMethod());
@@ -328,7 +330,9 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 				}
 			}
 			else {
+				// 通过反射工具类， 对setter方法开启暴力破解(私有方法， 我也可以调用)
 				ReflectionUtils.makeAccessible(writeMethod);
+				// 利用反射技术， 去执行对应的setter方法(不一定真正拥有该属性， 但是一定要有对应的setter方法)
 				writeMethod.invoke(getWrappedInstance(), value);
 			}
 		}

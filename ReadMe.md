@@ -1,4 +1,4 @@
-
+ApplicationContext 中的ioc容器的初始化流程： 
     ClassPathXmlApplicationContext
         构造方法
         AbstractApplicationContext.refresh : 刷新spring容器(删除原有容器， 创建新容器)
@@ -30,4 +30,20 @@ AbstractXmlApplicationContext
 DefaultBeanDefinitionDocumentReader
 XmlBeanDefinitionReader
 
-BeanDefinitionParserDelegate： 
+BeanDefinitionParserDelegate： 具体的有bean标签解析成BeanDefinition对象是有该对象完成的
+
+## bean的创建流程
+    AbstractBeanFactory.getBean
+        #doGetBean： 去获取缓存中的bean或者创建bean
+            DefaultSingletonBeanRegistry#getSingleton： 从三级缓存中获取bean实例 --- 牵扯到循环依赖的问题
+                AbstractAutowireCapableBeanFactory.createBean:  创建bean实例、 属性填充、 初始化
+                    AbstractAutowireCapableBeanFactory.doCreateBean:  真正干活的
+                        AbstractAutowireCapableBeanFactory.createBeanInstance： 1. 创建bean对象
+                        DefaultSingletonBeanRegistry.addSingletonFactory: 解决循环依赖， 也是对象存储到三级缓存中  -- 循环依赖的解决
+                        AbstractAutowireCapableBeanFactory.populateBean ： 2. 属性的填充
+                        AbstractAutowireCapableBeanFactory.initializeBean ： 3. bean的初始化 
+                        
+            #getObjectForBeanInstance --- 牵扯到的是BeanFactory和FactoryBean的面试问题
+## BeanFactory和FactoryBean的区别
+    BeanFactory是一个工厂
+    FactoryBean是一个对象， 该对象有生成另一个对象的能力

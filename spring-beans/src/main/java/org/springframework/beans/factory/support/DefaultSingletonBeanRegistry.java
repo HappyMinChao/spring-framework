@@ -70,19 +70,30 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
 
-	/** Cache of singleton objects: bean name --> bean instance */
+	/**
+	 * 存放已经创建好的bean对应的Object
+	 *  Cache of singleton objects: bean name --> bean instance
+	 */
 	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
-	/** Cache of singleton factories: bean name --> ObjectFactory */
+	/**
+	 * 存放beanName对应的ObjectFactory
+	 *  Cache of singleton factories: bean name --> ObjectFactory
+	 */
 	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
-	/** Cache of early singleton objects: bean name --> bean instance */
+	/**
+	 * 存放beanName对应的ObjectFactory.getObject
+	 *  Cache of early singleton objects: bean name --> bean instance
+	 */
 	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order */
 	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
-	/** Names of beans that are currently in creation */
+	/**
+	 * 正在创建中的bean Set
+	 *  Names of beans that are currently in creation */
 	private final Set<String> singletonsCurrentlyInCreation =
 			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
@@ -152,6 +163,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.singletonObjects) {
 			if (!this.singletonObjects.containsKey(beanName)) {
 				this.singletonFactories.put(beanName, singletonFactory);
+				// singletonFactories添加了ObjectFactory后会把earlySingletonObjects给remove掉
 				this.earlySingletonObjects.remove(beanName);
 				this.registeredSingletons.add(beanName);
 			}
@@ -165,6 +177,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	/**
+	 * 三级缓存很重要的是解决了循环依赖
 	 * Return the (raw) singleton object registered under the given name.
 	 * <p>Checks already instantiated singletons and also allows for an early
 	 * reference to a currently created singleton (resolving a circular reference).
@@ -174,14 +187,25 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		// 从一级缓存中获取单例对象
 		Object singletonObject = this.singletonObjects.get(beanName);
+		// isSingletonCurrentlyIncreation
+			// 判断当前单例bean是否正在创建中， 也就是没有初始化完成
+			// 比如A的构造器依赖了B对象所以得先去创建B对象， 或者在A的populateBean过程中依赖了B对象， 得先去创建B对象
+		// 这是的A就是处于创建中的状态
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
+				// 从二级缓存中获取单实例bean
 				singletonObject = this.earlySingletonObjects.get(beanName);
+				// allowEarlyReference
+				// 是否允许从singletonFactories中通过getObject拿到对象
 				if (singletonObject == null && allowEarlyReference) {
+					// 从三级缓存中获取单例bean
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
+						// 通过单例工程获取单例bean
 						singletonObject = singletonFactory.getObject();
+						// 从三级缓存移动到了二级缓存
 						this.earlySingletonObjects.put(beanName, singletonObject);
 						this.singletonFactories.remove(beanName);
 					}

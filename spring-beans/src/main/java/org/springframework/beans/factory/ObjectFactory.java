@@ -39,6 +39,7 @@ import org.springframework.beans.BeansException;
 public interface ObjectFactory<T> {
 
 	/**
+	 * 为了提前曝光Object
 	 * Return an instance (possibly shared or independent)
 	 * of the object managed by this factory.
 	 * @return the resulting instance
