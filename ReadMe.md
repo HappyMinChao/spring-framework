@@ -65,6 +65,6 @@ DefaultBeanDefinitionDocumentReader.parseBeanDefinitions
                 SimpleBeanFactoryAwareAspectInstanceFactory ： 对应的BeanDefinition(生产自定义的MyAdvice对象)
     
     
-    
+    AspectJPointcutAdvisor: 封装了Advice和PointCut的通知器类， 该类最终会形成执行链对目标对象
     
 ## InstantiationAwareBeanPostProcessor 后置处理器

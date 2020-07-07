@@ -372,8 +372,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 					beanDefinitions, beanReferences);
 
 			// configure the advisor
+			// 通知器类的BeanDefinition对象
 			RootBeanDefinition advisorDefinition = new RootBeanDefinition(AspectJPointcutAdvisor.class);
 			advisorDefinition.setSource(parserContext.extractSource(adviceElement));
+			// 给通知器类设置Advice对象属性值
 			advisorDefinition.getConstructorArgumentValues().addGenericArgumentValue(adviceDef);
 			if (aspectElement.hasAttribute(ORDER_PROPERTY)) {
 				advisorDefinition.getPropertyValues().add(
@@ -381,6 +383,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			}
 
 			// register the final advisor
+			// 将advisorDefinition注册到IoC容器中
 			parserContext.getReaderContext().registerWithGeneratedName(advisorDefinition);
 
 			return advisorDefinition;
@@ -400,13 +403,14 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			Element adviceElement, ParserContext parserContext, String aspectName, int order,
 			RootBeanDefinition methodDef, RootBeanDefinition aspectFactoryDef,
 			List<BeanDefinition> beanDefinitions, List<BeanReference> beanReferences) {
-
+		// 根据通知类型的不同，分别创建对应的BeanDefinition对象(可以去看看getAdviceClass方法)
 		RootBeanDefinition adviceDefinition = new RootBeanDefinition(getAdviceClass(adviceElement, parserContext));
 		adviceDefinition.setSource(parserContext.extractSource(adviceElement));
 
+		// 为不同的增强通知类， 添加统一的属性值
 		adviceDefinition.getPropertyValues().add(ASPECT_NAME_PROPERTY, aspectName);
 		adviceDefinition.getPropertyValues().add(DECLARATION_ORDER_PROPERTY, order);
-
+		// 为不同的增强通知类， 添加对应的属性值
 		if (adviceElement.hasAttribute(RETURNING)) {
 			adviceDefinition.getPropertyValues().add(
 					RETURNING_PROPERTY, adviceElement.getAttribute(RETURNING));
@@ -421,9 +425,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		ConstructorArgumentValues cav = adviceDefinition.getConstructorArgumentValues();
+		// 设置第一个构造参数： 方法工厂对象的BeanDefinition
 		cav.addIndexedArgumentValue(METHOD_INDEX, methodDef);
 
+		// 解析<aop:before> 、 <aop:after> 、 <aop:after-returning>标签中的opintcut或者pointcut-ref属性
 		Object pointcut = parsePointcutProperty(adviceElement, parserContext);
+		// 设置第二个构造参数： 切入点BeanDefinition
 		if (pointcut instanceof BeanDefinition) {
 			cav.addIndexedArgumentValue(POINTCUT_INDEX, pointcut);
 			beanDefinitions.add((BeanDefinition) pointcut);
@@ -433,7 +440,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			cav.addIndexedArgumentValue(POINTCUT_INDEX, pointcutRef);
 			beanReferences.add(pointcutRef);
 		}
-
+		// 设置第三个构造参数： 实例工厂BeanDefinition
 		cav.addIndexedArgumentValue(ASPECT_INSTANCE_FACTORY_INDEX, aspectFactoryDef);
 
 		return adviceDefinition;
@@ -443,19 +450,25 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	 * Gets the advice implementation class corresponding to the supplied {@link Element}.
 	 */
 	private Class<?> getAdviceClass(Element adviceElement, ParserContext parserContext) {
+		// 获取标签名称， 比如aop：before标签对应的标签名是before
 		String elementName = parserContext.getDelegate().getLocalName(adviceElement);
+		// 处理<aop:before>标签
 		if (BEFORE.equals(elementName)) {
 			return AspectJMethodBeforeAdvice.class;
 		}
+		// 处理<aop:fater>标签
 		else if (AFTER.equals(elementName)) {
 			return AspectJAfterAdvice.class;
 		}
+		// 处理<aop:after-returning>标签
 		else if (AFTER_RETURNING_ELEMENT.equals(elementName)) {
 			return AspectJAfterReturningAdvice.class;
 		}
+		// 处理<aop:after-throwing>标签
 		else if (AFTER_THROWING_ELEMENT.equals(elementName)) {
 			return AspectJAfterThrowingAdvice.class;
 		}
+		// 处理<aop:aroud>标签
 		else if (AROUND.equals(elementName)) {
 			return AspectJAroundAdvice.class;
 		}
