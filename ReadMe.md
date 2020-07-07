@@ -48,4 +48,23 @@ BeanDefinitionParserDelegate： 具体的有bean标签解析成BeanDefinition对
     BeanFactory是一个工厂
     FactoryBean是一个对象， 该对象有生成另一个对象的能力
     
+## aop源码入口： 
+DefaultBeanDefinitionDocumentReader.parseBeanDefinitions
+    BeanDefinitionParserDelegate.getNamespaceURI： 获取命名空间URI http://www.springframework.org/schema/aop
+        DefaultNamespaceHandlerResolver.resolve : 获取的是NamespaceHandler
+            DefaultNamespaceHandlerResolver.getHandlerMappings ： 获取所有的命名空间和对应的NamespaceHandler对应关系
+            AopNamespaceHandler.init ： 去注册冰倩名称和BeanDefinitionParse之间的对应关系
+        NamespaceHandlerSupport.parse ； 使用对应的NamespaceHandler去加载BeanDefinition信息
+            NamespaceHandlerSupport.findParserForElement： 获取指定自定义标签对应的BeanDefinitionParser
+    ConfigBeanDefinitionParser.parse：专门用来解析aop:config标签的BeanDefinitionParser
+        ConfigBeanDefinitionParser.parsePointcut ： 解析切入点对象AspectJExpressionPointcut
+        ConfigBeanDefinitionParser.parseAdvisor ： 里面主要使用的是spring aop， 产生一个DefaultBeanFactoryPointcutAdvisor的BeanDefinition对象， 并注册
+        ConfigBeanDefinitionParser.parseAspect ： 里面主要使用的是aspectJ整合spring实现的 aop, 产生的对象就多了
+            ConfigBeanDefinitionParser.parseAdvice ： 产生了五个advice对应的BeanDefinition对象和一个advisor对应的BeanDefinition对象
+                MethodLocatingFactoryBean对应的BeanDefinition（讲MyAdvice中的before等方法， 封装成Method对象）
+                SimpleBeanFactoryAwareAspectInstanceFactory ： 对应的BeanDefinition(生产自定义的MyAdvice对象)
+    
+    
+    
+    
 ## InstantiationAwareBeanPostProcessor 后置处理器

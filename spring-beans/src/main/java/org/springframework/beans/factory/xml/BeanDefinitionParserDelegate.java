@@ -1383,6 +1383,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele) {
+		// 解析自定义标签
 		return parseCustomElement(ele, null);
 	}
 
@@ -1394,10 +1395,15 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		// 获取命名空间URI(就是获取beans标签的xmlns:aop或者xmlns：content属性的值)
+		// http://www.springframework.org/schema/aop
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;
 		}
+		// 根据不同的命名空间URI， 去匹配不同的NamespaceHandler(一个命名空间对应一个NamespaceHandler)
+		// 此处会调用DefaultNamespaceHandlerResolver类的resolve方法
+		// 两步操作： 查找NamespaceHandler、 调用NamespaceHandler的init方法进行初始化(针对不同自定义标签注册响应的BeanDefinitionParser)
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
